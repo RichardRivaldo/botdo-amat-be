@@ -1,9 +1,2 @@
 # FreshHouse Backend
-Backend service for FreshHouse application, built with Node.Js
-
-# TL;DR;
-
-Copy `.env.copy` as `.env` and adjust your configuration as needed.
-```
-make all
-```
+Backend service for Tubes Stima 3 application, built with Node.Js
