@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
 		},
 	},
 	{
-		collection: "tasks",
+		collection: "users",
 	}
 );
 

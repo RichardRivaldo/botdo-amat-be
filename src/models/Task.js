@@ -9,7 +9,7 @@ const taskSchema = new mongoose.Schema(
 			unique: true,
 		},
 		date: {
-			type: DATE,
+			type: Date,
 			required: true,
 		},
 		name: {
