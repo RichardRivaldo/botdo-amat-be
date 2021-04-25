@@ -12,7 +12,7 @@ async function startServer() {
     await mainLoader({ expressApp: app });
 
     mongoConnect.then(() => {
-        Logger.info('');
+        Logger.info('Connected to Mongo DB!');
     });
 
     app.listen(config.port, err => {

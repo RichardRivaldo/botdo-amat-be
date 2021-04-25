@@ -1,15 +1,11 @@
-import express from "express";
-const router = express.Router();
+import { Router } from 'express';
 
-const {Task} = require("../models/Task");
+import { getAllTask } from '../services/taskService';
 
-router.get("/", async (req, res) => {
-	try {
-		let tasks = await Task.find();
-		res.send(tasks);
-	} catch (err) {
-		res.send({msg: err});
-	}
+const router = Router();
+
+router.get('/', async (req, res) => {
+    getAllTask(req, res);
 });
 
 export default router;

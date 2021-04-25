@@ -1,10 +1,11 @@
-const {Chat} = require("../models/Chat");
+import { Router } from 'express';
 
-router.get("/", async (req, res) => {
-	try {
-		let chats = await Chat.find();
-		res.send(chats);
-	} catch (err) {
-		res.send({msg: err});
-	}
+import { getAllChat } from '../services/chatService';
+
+const router = Router();
+
+router.get('/', async (req, res) => {
+    getAllChat(req, res);
 });
+
+export default router;

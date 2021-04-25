@@ -1,31 +1,32 @@
 const mongoose = require("mongoose");
-const userSchema = require("./User");
+const { Task } = require('./Task');
 const Schema = mongoose.Schema;
 
-const chatSchema = new mongoose.Schema(
-	{
-		id: {
-			type: Number,
-			required: true,
-			unique: true,
-		},
-		content: {
-			type: String,
-			required: true,
-		},
-		timestamp: {
-			type: Date,
-			required: true,
-			default: Date.now(),
-		},
-		user: {
+const chatSchema = new Schema(
+    {
+        id: {
+            type: Number,
+            required: true,
+            unique: true,
+        },
+        content: {
+            type: String,
+            required: true,
+        },
+        timestamp: {
+            type: Date,
+            required: true,
+            default: Date.now(),
+        },
+        user: {
             type: Schema.Types.ObjectId,
-            ref: Task
-        }
-	},
-	{
-		collection: "chats",
-	}
+            ref: Task,
+        },
+    },
+    {
+        collection: 'chats',
+        timestamps: true,
+    },
 );
 
-exports.Employee = mongoose.model("Employee", taskSchema);
+exports.Chat = mongoose.model('Chat', chatSchema);
