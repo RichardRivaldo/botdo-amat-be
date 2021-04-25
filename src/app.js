@@ -3,7 +3,7 @@ require('@babel/register');
 import config from './config';
 import express from 'express';
 import Logger from './loaders/logger';
-import mongoConnect from "./loaders/mongo";
+import mongoConnect from './loaders/mongo';
 import mainLoader from './loaders';
 
 async function startServer() {
@@ -12,7 +12,7 @@ async function startServer() {
     await mainLoader({ expressApp: app });
 
     mongoConnect.then(() => {
-        Logger.info("Connected to MongoDB...");
+        Logger.info('');
     });
 
     app.listen(config.port, err => {
