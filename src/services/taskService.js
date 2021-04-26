@@ -26,11 +26,32 @@ export const task = async (req, res) => {
         });
     } catch (err) {
         res.status(400).json({
-            status: 'Success',
+            status: 'Failed',
             data: err.message,
         });
     }
 };
+
+// export const addTask = async (req, res) => {
+//     try {
+//         const data = await Task.create({
+//             userId: '608688b522900114d02d2adc',
+//             name: 'IF2121',
+//             jenis: 'Tubes',
+//             isFinished: false,
+//         });
+
+//         res.status(200).json({
+//             status: 'Success',
+//             data: data,
+//         });
+//     } catch (err) {
+//         res.status(400).json({
+//             status: 'Failed',
+//             data: err.message,
+//         });
+//     }
+// };
 
 // export const getTaskById = async (req, res) => {
 //     try {

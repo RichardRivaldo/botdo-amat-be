@@ -43,8 +43,6 @@ const generateBadMatchTable = pattern => {
     return res;
 };
 
-const max = (a, b) => {
-    return a > b ? a : b;
-};
+const max = (a, b) => (a > b ? a : b);
 
 export default boyermoore;

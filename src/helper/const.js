@@ -1,14 +1,10 @@
-const MAX_REQUEST_SIZE = '10mb';
+exports.MAX_REQUEST_SIZE = '10mb';
 
-const TUGAS = {
-    KUIS: 'KUIS',
-    UJIAN: 'UJIAN',
-    TUCIL: 'TUCIL',
-    TUBES: 'TUBES',
-    PRAKTIKUM: 'PRAKTIKUM',
+exports.TUGAS = {
+    KUIS: 'Kuis',
+    UJIAN: 'Ujian',
+    TUCIL: 'Tucil',
+    TUBES: 'Tubes',
+    PRAKTIKUM: 'Praktikum',
     PR: 'PR',
 };
-
-Object.freeze(TUGAS);
-
-export { MAX_REQUEST_SIZE, TUGAS };

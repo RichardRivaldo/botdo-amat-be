@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
+const autoIncrement = require('mongoose-auto-increment');
+const { TUGAS } = require('../helper/const');
+
+const { KUIS, UJIAN, PR, TUCIL, TUBES, PRAKTIKUM } = TUGAS;
 
 const taskSchema = new mongoose.Schema({
+    _id: {
+        type: Number,
+        required: true,
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -17,6 +25,7 @@ const taskSchema = new mongoose.Schema({
     },
     jenis: {
         type: String,
+        enum: [KUIS, UJIAN, PR, TUCIL, TUBES, PRAKTIKUM],
         required: true,
     },
     isFinished: {
@@ -26,4 +35,6 @@ const taskSchema = new mongoose.Schema({
     },
 });
 
+autoIncrement.initialize(mongoose.connection);
+taskSchema.plugin(autoIncrement.plugin, 'Task');
 exports.Task = mongoose.model('Task', taskSchema);
