@@ -1,15 +1,52 @@
 import { Task } from '../models/Task';
+import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
 import KMP from '../helper/kmp';
 
+// Get All Task
 const isAllTaskQuestion = question => {
-    const allQuestions = ['sejauh ini', 'semua', 'seluruh'];
-    for (let allQuestion in allQuestions) {
-        if (KMP(question, allQuestion)) return true;
+    const questionPattern = ['sejauh ini', 'semua', 'seluruh'];
+    for (let i = 0; i < questionPattern.length; i++) {
+        if (KMP(question, questionPattern[i]).length) return true;
     }
     return false;
 };
+const getAllTask = async userId => ({ res: await Task.find({ userId }), method: 'get' });
 
-const getAllTask = async userId => await Task.find({ userId });
+// Add Task
+const isAddTask = question => {
+    const courseId = getKodeMatkul(question);
+    const date = getDate(question);
+    const type = getKeyword(question);
+
+    return courseId && date && type;
+};
+const addTask = async (question, userId) => {
+    const courseId = getKodeMatkul(question);
+    const date = getDate(question);
+    const type = getKeyword(question);
+    const { year: yyyy, month: mm, date: dd } = date.groups;
+
+    let topic;
+    topic = question
+        .slice(KMP(question, courseId[0]))
+        .replace(courseId[0], '')
+        .replace(date[0], '')
+        .replace(/pada|tentang|mengenai/gi, '')
+        .trim();
+
+    console.log(new Date(`${mm}-${dd}-${yyyy}`));
+
+    const tasks = await Task.create({
+        userId,
+        date: new Date(`${mm}-${dd}-${yyyy}`),
+        name: courseId[0],
+        jenis: type,
+        isFinished: false,
+    });
+
+    console.log(topic);
+    return { res: tasks, method: 'add' };
+};
 
 export const task = async (req, res) => {
     let tasks;
@@ -18,6 +55,7 @@ export const task = async (req, res) => {
 
     try {
         if (isAllTaskQuestion(question)) tasks = await getAllTask(userId);
+        else if (isAddTask(question)) tasks = await addTask(question, userId);
         else throw new Error('Bad request');
 
         res.status(200).json({
@@ -31,49 +69,3 @@ export const task = async (req, res) => {
         });
     }
 };
-
-// export const addTask = async (req, res) => {
-//     try {
-//         const data = await Task.create({
-//             userId: '608688b522900114d02d2adc',
-//             name: 'IF2121',
-//             jenis: 'Tubes',
-//             isFinished: false,
-//         });
-
-//         res.status(200).json({
-//             status: 'Success',
-//             data: data,
-//         });
-//     } catch (err) {
-//         res.status(400).json({
-//             status: 'Failed',
-//             data: err.message,
-//         });
-//     }
-// };
-
-// export const getTaskById = async (req, res) => {
-//     try {
-//         let query = { id: req.body.id };
-//         let task = await Task.findOne(query);
-//         res.send(task);
-//     } catch (err) {
-//         res.send({ msg: err });
-//     }
-// };
-
-// export const setFinishTask = async (req, res) => {
-//     try {
-//         let query = { id: req.body.id };
-//         let update = { isFinished: true };
-//         let target = await Task.findOneAndUpdate(query, update);
-//         if (target) {
-//             res.status(200).send({ msg: 'Task updated!' });
-//         } else {
-//             res.status(500).send({ msg: 'Something went wrong!' });
-//         }
-//     } catch (err) {
-//         res.send({ msg: err });
-//     }
-// };

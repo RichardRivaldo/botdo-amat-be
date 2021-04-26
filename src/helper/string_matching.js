@@ -15,7 +15,7 @@ export const getKeyword = str => {
     } else if (str.includes(TUGAS.PR.toLowerCase)) {
         return TUGAS.PR;
     } else {
-        return false;
+        return '';
     }
 };
 
@@ -29,21 +29,18 @@ export const getDate = str => {
 
     let res = str.match(pattern1) || str.match(pattern2);
     if (res) {
-        //kalau bentuknya udah yyyy-mm-dd atau dd-mm-yyyy
-        let { year, month, date } = res.groups;
-        return new Date(`${date}-${month}-${year}`);
+        return res;
+        // let { year, month, date } = res.groups;
+        // return new Date(`${date}-${month}-${year}`);
     }
 
     return null;
 };
 
 export const getKodeMatkul = str => {
-    let pattern = '[A-Z][A-Z][0-9][0-9][0-9][0-9]';
+    let pattern = /[A-Z][A-Z][0-9][0-9][0-9][0-9]/;
     let res = str.match(pattern);
-    if (res) {
-        return str;
-    }
-    return null;
+    return res;
 };
 
 export const getID = str => {
