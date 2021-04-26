@@ -1,11 +1,8 @@
 import { Router } from 'express';
-
-import { getAllTask } from '../services/taskService';
+import { task } from '../services/taskService';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
-    getAllTask(req, res);
-});
+router.get('/', task);
 
 export default router;

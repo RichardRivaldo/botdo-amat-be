@@ -30,6 +30,7 @@ const boyermoore = (str, target, isCaseSensitive = false) => {
         }
         i += BMT[str[i - j]] || countTarget;
     }
+
     return res;
 };
 

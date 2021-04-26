@@ -33,6 +33,7 @@ export const getDate = str => {
         let { year, month, date } = res.groups;
         return new Date(`${date}-${month}-${year}`);
     }
+
     return null;
 };
 
