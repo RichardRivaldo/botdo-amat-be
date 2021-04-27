@@ -1,5 +1,5 @@
 import { Task } from '../models/Task';
-import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
+import { getKodeMatkul, getDate, getKeyword, getID } from '../helper/string_matching';
 import { postChatFromUser, postChatFromBot } from './chatService.js';
 import KMP from '../helper/kmp';
 
@@ -68,7 +68,12 @@ export const task = async (req, res) => {
         } else if (isAddTask(content)) {
             console.log('KOK SINI');
             tasks = await addTask(content, userId);
-        } else throw new Error('Bad request');
+        } else if(isFinishTask(content)){
+            tasks = await finishTask(content, userId);
+        } else if(isUpdateTask(content)){
+            tasks = await updateTask(content, userId);
+        }
+        else throw new Error('Bad request');
 
         const chat = await postChatFromBot(userId, tasks, 'post');
 
@@ -84,3 +89,47 @@ export const task = async (req, res) => {
         });
     }
 };
+
+// Finish Task
+const isFinishTask = question => {
+    const id = getID(question);
+    const pattern = ['selesai', 'sudah', 'finish'];
+    for(let i = 0; i < pattern.length; i++){
+        if(KMP(question, pattern[i]).length) return true && id != null;
+    }
+    return false;
+}
+
+const finishTask = async (question, userId) => {
+    const id = getID(question);
+    const filter = { userId : userId, _id : id };
+    const finish = { isFinished : true };
+
+    let finished = await Task.findOneAndUpdate(filter, finish);
+
+    if(finished.length == 0) return "ID Task tidak ditemukan!";
+    else return "Berhasil menyelesaikan Task dengan ID ${id}!";
+}
+
+// Update Task
+const isUpdateTask = question => {
+    const id = getID(question);
+    const newDate = getDate(question);
+    const pattern = ['diundur', 'diubah', 'dimajukan', 'update'];
+    for(let i = 0; i < pattern.length; i++){
+        if(KMP(question, pattern[i]).length) return true && id != null && newDate != null;
+    }
+    return false;
+}
+
+const updateTask = async (question, userId) => {
+    const id = getID(question);
+    const newDate = getDate(question);
+    const filter = { userId : userId, _id : id };
+    const update = { date : newDate };
+
+    let updated = await Task.findOneAndUpdate(filter, update);
+
+    if(updated.length == 0) return "ID Task tidak ditemukan!";
+    else return "Berhasil memperbarui Task dengan ID ${id}!";
+}
