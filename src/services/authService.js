@@ -72,6 +72,10 @@ export const login = async (req, res) => {
     }
 };
 
+export const getUser = async (req, res) => {
+    res.send(req.user);
+};
+
 export const protect = async (req, res, next) => {
     const { authorization: auth } = req.headers;
     const token = auth && auth.startsWith('Bearer') ? auth.split(' ')[1] : null;
