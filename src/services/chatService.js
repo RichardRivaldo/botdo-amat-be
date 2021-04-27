@@ -35,7 +35,6 @@ export const postChatFromBot = async (user, obj, method) => {
                 content = isNull ? '[Task telah ]' : '[Task berhasil diperbaharui!]';
         }
     }
-    console.log(obj);
     let chat = await new Chat({ user, content, isRobot: true });
     await chat.save();
     return chat;
