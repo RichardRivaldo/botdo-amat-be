@@ -24,8 +24,9 @@ export const postChatFromBot = async (user, obj) => {
     const { method, msg, res } = obj;
     let content = '';
     if (obj == false) {
-        content = '[Terjadi kesalahan pada server!]';
-    } else {
+                          content = '[Terjadi kesalahan pada server!]';
+                          // throw new Error('[Pesan tidak dikenali!]');
+                      } else {
         let isNull = !Object.keys(obj).length;
         switch (method) {
             case 'post':
