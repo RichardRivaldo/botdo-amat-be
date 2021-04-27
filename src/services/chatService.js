@@ -37,7 +37,6 @@ export const postChatFromBot = async (user, obj, method) => {
     }
     console.log(obj);
     let chat = await new Chat({ user, content, isRobot: true });
-    console.log(chat);
     await chat.save();
     return chat;
 };

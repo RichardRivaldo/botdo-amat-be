@@ -1,5 +1,5 @@
 import { Task } from '../models/Task';
-import { getKodeMatkul, getDate, getKeyword, get2Date, getNDate } from '../helper/string_matching';
+import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
 import { postChatFromUser, postChatFromBot } from './chatService.js';
 import KMP from '../helper/kmp';
 
@@ -11,64 +11,28 @@ const isAllTaskQuestion = question => {
     }
     return false;
 };
+const getAllTask = async userId => await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
+
+// Get current task
+const isCurrentTaskQuestion = question => {
+    const questionPattern = ['hari ini'];
+    for (let i = 0; i < questionPattern.length; i++) {
+        if (KMP(question, questionPattern[i]).length) return true;
+    }
+    return false;
+};
+const getCurrentTask = async userId =>
+    await Task.find({
+        userId,
+        isFinished: false,
+        date: {
+            $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString(),
+            $lt: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
+        },
+    });
 
 // Add Task
-const isAddTask = question => {
-    const courseId = getKodeMatkul(question);
-    const date = getDate(question);
-    const type = getKeyword(question);
-
-    console.log('INI DARI ADD TASK');
-    console.log(courseId && date && type);
-
-    return courseId && date && type;
-};
-
-const isTaskBetween = question => {
-    return get2Date(question);
-};
-
-const isTaskAhead = question => {
-    return getNDate(question);
-};
-
-const getAllTask = async userId => ({ res: await Task.find({ userId }), method: 'get' });
-
-const getTasksBetween = async (userId, str) => {
-    if (get2Date(str)) {
-        const { date1, date2 } = get2Date(str);
-        const res = Task.find({
-            //query today up to tonight
-            userId,
-            date: {
-                $gte: new Date(date1),
-                $lt: new Date(date2),
-            },
-        });
-        return { res, method: 'get' };
-    } else {
-        return { res: [], method: 'get' };
-    }
-};
-
-const getTaskAhead = (userId, str) => {
-    const temp = getNDate(str);
-    if (temp) {
-        const { date1, date2 } = temp;
-        const res = Task.find({
-            //query today up to tonight
-            userId,
-            date: {
-                $gte: new Date(date1),
-                $lt: new Date(date2),
-            },
-        });
-        return { res, method: 'get' };
-    } else {
-        return { res: [], method: 'get' };
-    }
-};
-
+const isAddTask = question => getKodeMatkul(question) && getDate(question) && getKeyword(question);
 const addTask = async (question, userId) => {
     const courseId = getKodeMatkul(question);
     const date = getDate(question);
@@ -83,7 +47,7 @@ const addTask = async (question, userId) => {
         .replace(/pada|tentang|mengenai/gi, '')
         .trim();
 
-    console.log(new Date(`${mm}-${dd}-${yyyy}`));
+    if (topic.length == 0) throw new Error('Bad request');
 
     const tasks = await Task.create({
         userId,
@@ -94,8 +58,7 @@ const addTask = async (question, userId) => {
         isFinished: false,
     });
 
-    console.log(topic);
-    return { res: tasks, method: 'add' };
+    return tasks;
 };
 
 export const task = async (req, res) => {
@@ -105,29 +68,26 @@ export const task = async (req, res) => {
 
     await postChatFromUser(req);
     try {
-        if (isTaskBetween(content)) {
-            tasks = await getTasksBetween(userId, content);
-        } else if (isTaskAhead(content)) {
-            tasks = await getTaskAhead(userId, content);
-        } else if (isAllTaskQuestion(content)) {
-            tasks = await getAllTask(userId);
-        } else if (isAddTask(content)) {
-            tasks = await addTask(content, userId);
-        } else if(isFinishTask(content)){
-            tasks = await finishTask(content, userId);
-        } else if(isUpdateTask(content)){
-            tasks = await updateTask(content, userId);
+        // Add task
+        if (isAddTask(content)) tasks = await addTask(content, userId);
+        // Get task
+        else if (KMP(content, 'deadline')) {
+            if (isAllTaskQuestion(content)) tasks = await getAllTask(userId);
+            else if (isCurrentTaskQuestion(content)) tasks = await getCurrentTask(userId);
+            else throw new Error('Bad request');
+        } else {
+            throw new Error('Bad request');
         }
-        else throw new Error('Bad request');
 
-        const chat = await postChatFromBot(userId, tasks, 'post');
+        await postChatFromBot(userId, tasks, 'post');
 
         res.status(200).json({
             status: 'Success',
             data: tasks,
         });
     } catch (err) {
-        const chat = await postChatFromBot(userId, false, 'post');
+        await postChatFromBot(userId, false, 'post');
+
         res.status(400).json({
             status: 'Failed',
             data: err.message,

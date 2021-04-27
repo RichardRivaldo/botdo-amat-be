@@ -3,21 +3,14 @@ import boyermoore from './boyermoore';
 
 export const getKeyword = str => {
     str = str.toLowerCase();
-    if (str.includes(TUGAS.KUIS.toLowerCase())) {
-        return TUGAS.KUIS;
-    } else if (str.includes(TUGAS.UJIAN.toLowerCase)) {
-        return TUGAS.UJIAN;
-    } else if (str.includes(TUGAS.TUCIL.toLowerCase)) {
-        return TUGAS.TUCIL;
-    } else if (str.includes(TUGAS.TUBES.toLowerCase)) {
-        return TUGAS.TUBES;
-    } else if (str.includes(TUGAS.PRAKTIKUM.toLowerCase)) {
-        return TUGAS.PRAKTIKUM;
-    } else if (str.includes(TUGAS.PR.toLowerCase)) {
-        return TUGAS.PR;
-    } else {
-        return '';
-    }
+
+    if (str.includes(TUGAS.KUIS.toLowerCase())) return TUGAS.KUIS;
+    else if (str.includes(TUGAS.UJIAN.toLowerCase())) return TUGAS.UJIAN;
+    else if (str.includes(TUGAS.TUCIL.toLowerCase())) return TUGAS.TUCIL;
+    else if (str.includes(TUGAS.TUBES.toLowerCase())) return TUGAS.TUBES;
+    else if (str.includes(TUGAS.PRAKTIKUM.toLowerCase())) return TUGAS.PRAKTIKUM;
+    else if (str.includes(TUGAS.PR.toLowerCase())) return TUGAS.PR;
+    else return '';
 };
 
 export const getDate = str => {
