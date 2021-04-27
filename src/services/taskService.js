@@ -11,12 +11,7 @@ const isAllTaskQuestion = question => {
     }
     return false;
 };
-const getAllTask = async userId =>
-    await Task.find({
-        userId,
-        isFinished: false,
-        date: { $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString() },
-    });
+const getAllTask = async userId => await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
 
 // Get current task
 const isCurrentTaskQuestion = question => {
@@ -34,29 +29,6 @@ const getCurrentTask = async userId =>
             $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString(),
             $lt: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
         },
-    });
-
-// Get deadline task
-const isDeadlineFromTask = question => {
-    const questionPattern = ['kapan', 'tanggal berapa'];
-    let flag = false;
-
-    for (let i = 0; i < questionPattern.length; i++) {
-        if (KMP(question, questionPattern[i]).length) {
-            flag = true;
-            break;
-        }
-    }
-
-    return flag && getKodeMatkul(question) && getKeyword(question);
-};
-const getDeadlineFromTask = async (question, userId) =>
-    await Task.find({
-        userId,
-        isFinished: false,
-        kode: getKodeMatkul(question)[0],
-        jenis: getKeyword(question),
-        date: { $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString() },
     });
 
 // Add Task
@@ -102,9 +74,11 @@ export const task = async (req, res) => {
         else if (KMP(content, 'deadline')) {
             if (isAllTaskQuestion(content)) tasks = await getAllTask(userId);
             else if (isCurrentTaskQuestion(content)) tasks = await getCurrentTask(userId);
-            else if (isDeadlineFromTask(content)) tasks = await getDeadlineFromTask(content, userId);
             else throw new Error('Bad request');
-        } else {
+        } 
+        else if(isFinishTask(content)) tasks = await finishTask(content, userId);
+        else if(isUpdateTask(content)) tasks = await updateTask(content, userId);
+        else {
             throw new Error('Bad request');
         }
 
@@ -115,7 +89,6 @@ export const task = async (req, res) => {
             data: tasks,
         });
     } catch (err) {
-        console.log(err);
         await postChatFromBot(userId, false, 'post');
 
         res.status(400).json({
@@ -124,3 +97,52 @@ export const task = async (req, res) => {
         });
     }
 };
+
+// Finish Task
+const isFinishTask = question => {
+    const id = getID(question);
+    const pattern = ['selesai', 'sudah', 'finish'];
+    for(let i = 0; i < pattern.length; i++){
+        if(KMP(question, pattern[i]).length) return true && id != null;
+    }
+    return false;
+}
+
+const finishTask = async (question, userId) => {
+    const id = Number(getID(question));
+    console.log(id);
+    const filter = { userId : userId, _id : id };
+    const finish = { isFinished : true };
+
+    let finished = await Task.findOneAndUpdate(filter, finish);
+    console.log(finished);
+    console.log("SINI");
+
+    if(finished.length == 0) return "ID Task tidak ditemukan!";
+    else return "Berhasil menyelesaikan Task dengan ID ${id}!";
+}
+
+// Update Task
+const isUpdateTask = question => {
+    const id = getID(question);
+    const newDate = getDate(question);
+    const pattern = ['diundur', 'diubah', 'dimajukan', 'update'];
+    for(let i = 0; i < pattern.length; i++){
+        if(KMP(question, pattern[i]).length) return true && id != null && newDate != null;
+    }
+    return false;
+}
+
+const updateTask = async (question, userId) => {
+    const id = Number(getID(question));
+    const newDate = getDate(question);
+    const filter = { userId : userId, _id : id };
+    const update = { date : newDate };
+
+    let updated = await Task.findOneAndUpdate(filter, update);
+    console.log(updated);
+    console.log("SINI2");
+
+    if(updated.length == 0) return "ID Task tidak ditemukan!";
+    else return "Berhasil memperbarui Task dengan ID ${id}!";
+}
