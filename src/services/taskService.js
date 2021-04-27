@@ -75,7 +75,10 @@ export const task = async (req, res) => {
             if (isAllTaskQuestion(content)) tasks = await getAllTask(userId);
             else if (isCurrentTaskQuestion(content)) tasks = await getCurrentTask(userId);
             else throw new Error('Bad request');
-        } else {
+        } 
+        else if(isFinishTask(content)) tasks = await finishTask(content, userId);
+        else if(isUpdateTask(content)) tasks = await updateTask(content, userId);
+        else {
             throw new Error('Bad request');
         }
 
@@ -111,6 +114,8 @@ const finishTask = async (question, userId) => {
     const finish = { isFinished : true };
 
     let finished = await Task.findOneAndUpdate(filter, finish);
+    console.log(finished);
+    console.log("SINI");
 
     if(finished.length == 0) return "ID Task tidak ditemukan!";
     else return "Berhasil menyelesaikan Task dengan ID ${id}!";
@@ -134,6 +139,8 @@ const updateTask = async (question, userId) => {
     const update = { date : newDate };
 
     let updated = await Task.findOneAndUpdate(filter, update);
+    console.log(updated);
+    console.log("SINI2");
 
     if(updated.length == 0) return "ID Task tidak ditemukan!";
     else return "Berhasil memperbarui Task dengan ID ${id}!";
