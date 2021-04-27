@@ -1,5 +1,5 @@
 import { Task } from '../models/Task';
-import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
+import { getKodeMatkul, getDate, getKeyword, get2Date, getNDate } from '../helper/string_matching';
 import { postChatFromUser, postChatFromBot } from './chatService.js';
 import KMP from '../helper/kmp';
 
@@ -11,7 +11,6 @@ const isAllTaskQuestion = question => {
     }
     return false;
 };
-const getAllTask = async userId => ({ res: await Task.find({ userId }), method: 'get' });
 
 // Add Task
 const isAddTask = question => {
@@ -23,6 +22,51 @@ const isAddTask = question => {
     console.log(courseId && date && type);
 
     return courseId && date && type;
+};
+
+const isTaskBetween = question => {
+    return get2Date(question);
+};
+
+const isTaskAhead = question => {
+    return getNDate(question);
+};
+
+const getAllTask = async userId => ({ res: await Task.find({ userId }), method: 'get' });
+
+const getTasksBetween = async (userId, str) => {
+    if (get2Date(str)) {
+        const { date1, date2 } = get2Date(str);
+        const res = Task.find({
+            //query today up to tonight
+            userId,
+            date: {
+                $gte: new Date(date1),
+                $lt: new Date(date2),
+            },
+        });
+        return { res, method: 'get' };
+    } else {
+        return { res: [], method: 'get' };
+    }
+};
+
+const getTaskAhead = (userId, str) => {
+    const temp = getNDate(str);
+    if (temp) {
+        const { date1, date2 } = temp;
+        const res = Task.find({
+            //query today up to tonight
+            userId,
+            date: {
+                $gte: new Date(date1),
+                $lt: new Date(date2),
+            },
+        });
+        return { res, method: 'get' };
+    } else {
+        return { res: [], method: 'get' };
+    }
 };
 
 const addTask = async (question, userId) => {
@@ -61,12 +105,13 @@ export const task = async (req, res) => {
 
     await postChatFromUser(req);
     try {
-        console.log('MASUK SINI BANG');
-        if (isAllTaskQuestion(content)) {
-            console.log('MASUK SINI');
+        if (isTaskBetween(content)) {
+            tasks = await getTasksBetween(userId, content);
+        } else if (isTaskAhead(content)) {
+            tasks = await getTaskAhead(userId, content);
+        } else if (isAllTaskQuestion(content)) {
             tasks = await getAllTask(userId);
         } else if (isAddTask(content)) {
-            console.log('KOK SINI');
             tasks = await addTask(content, userId);
         } else throw new Error('Bad request');
 

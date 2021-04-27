@@ -1,4 +1,5 @@
 import { TUGAS } from './const';
+import boyermoore from './boyermoore';
 
 export const getKeyword = str => {
     str = str.toLowerCase();
@@ -37,7 +38,34 @@ export const getDate = str => {
     return null;
 };
 
-export const get2Date = str => {};
+export const get2Date = str => {
+    const date1 = getDate(str)[0];
+    str = str.replace(date1, '');
+    const date2 = getDate(str)[0];
+    return date1 && date2 ? { date1, date2 } : false;
+};
+
+export const getNDate = str => {
+    let n = getNumber(str)[0];
+    if (!n) {
+        return false;
+    }
+    const date1 = new Date();
+    let date2 = new Date();
+
+    let curDate = date1.getDate();
+    if (boyermoore(str, 'hari').length) {
+        date2 = date2.setDate(curDate + n * 1);
+    } else if (boyermoore(str, 'minggu').length) {
+        date2 = date2.setDate(curDate + n * 7);
+    } else {
+        return false;
+    }
+
+    date2 = new Date(date2);
+
+    return { date1, date2 };
+};
 
 export const getKodeMatkul = str => {
     let pattern = /[A-Z][A-Z][0-9][0-9][0-9][0-9]/;
@@ -50,7 +78,16 @@ export const getID = str => {
     let pattern = '[Ii][Dd][ -:][0-9]';
     let res = str.match(pattern);
     if (res) {
-        return str;
+        return res;
+    }
+    return null;
+};
+
+export const getNumber = str => {
+    let pattern = '[0-9]';
+    let res = str.match(pattern);
+    if (res) {
+        return res;
     }
     return null;
 };
