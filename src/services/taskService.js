@@ -1,5 +1,13 @@
 import { Task } from '../models/Task';
-import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
+import {
+    getKodeMatkul,
+    getDate,
+    getKeyword,
+    getID,
+    normalizeDate,
+    get2Date,
+    getNDate,
+} from '../helper/string_matching';
 import { postChatFromUser, postChatFromBot } from './chatService.js';
 import KMP from '../helper/kmp';
 
@@ -11,28 +19,152 @@ const isAllTaskQuestion = question => {
     }
     return false;
 };
-const getAllTask = async userId => await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
+
+const isTaskBetween = question => {
+    return get2Date(question);
+};
+
+const isTaskAhead = question => {
+    return getNDate(question);
+};
+
+const isSpecialTaskAhead = question => {
+    return isTaskAhead(question) && getKeyword(question);
+}
+
+const getTasksBetween = async (str, userId) => {
+    if (get2Date(str)) {
+        try{
+            console.log("INI DI DALEM TRY")
+            let { date1, date2 } = get2Date(str);
+
+            const res = await Task.find({
+                //query today up to tonight
+                userId,
+                date: {
+                    $gte: new Date(date1.setHours(0, 0, 0, 0)),
+                    $lt: new Date(date2.setHours(23, 59, 59, 999)),
+                },
+            });
+            return { res, method: 'get' };
+        }catch(error){
+            return {res : false, method: 'get'};
+        }
+        
+    } else {
+        return { res: [], method: 'get' };
+    }
+};
+
+const getTaskAhead = async (str, userId) => {
+    const temp = getNDate(str);
+    if (temp) {
+        const { date1, date2 } = temp;
+        try {
+            const res = await Task.find({
+                //query today up to tonight
+                userId,
+                date: {
+                    $gte: new Date(date1),
+                    $lt: new Date(date2),
+                },
+            });
+            return { res, method: 'get' };
+        } catch (error) {
+            return { res: [], method: 'get' };
+        }
+    } else {
+        return { res: [], method: 'get' };
+    }
+};
+
+const getSpecialTaskAhead = async (question, userId) => {
+    console.log("BERHASIL MASUK GET SPECIAL TASK AHEAD");
+    const temp = getNDate(question);
+    const jenis = getKeyword(question);
+    console.log(temp);
+    console.log("INI JENIS!!!!!!!!!!!!!!!!!");
+    console.log(jenis);
+    if (temp) {
+        const { date1, date2 } = temp;
+        try {
+            const res = await Task.find({
+                //query today up to tonight
+                userId,
+                jenis,
+                date: {
+                    $gte: new Date(date1),
+                    $lt: new Date(date2),
+                },
+            });
+            return { res, method: 'get' };
+        } catch (error) {
+            return { res: [], method: 'get' };
+        }
+    } else {
+        return { res: [], method: 'get' };
+    }
+};
+
+const getAllTask = async userId => {
+    const res = await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
+    console.log(res);
+    return { res, method: 'get' }
+};
 
 // Get current task
 const isCurrentTaskQuestion = question => {
+    console.log("IS CURRENT TASK QUESTION");
     const questionPattern = ['hari ini'];
     for (let i = 0; i < questionPattern.length; i++) {
         if (KMP(question, questionPattern[i]).length) return true;
     }
     return false;
 };
-const getCurrentTask = async userId =>
-    await Task.find({
+const getCurrentTask = async userId => {
+    const res = await Task.find({
         userId,
         isFinished: false,
         date: {
-            $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString(),
-            $lt: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
+            $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            $lt: new Date(new Date().setHours(23, 59, 59, 999)),
         },
     });
 
+    return { res, method: 'get' };
+}
+
+// Get deadline task
+const isDeadlineFromTask = question => {
+    const questionPattern = ['kapan', 'tanggal berapa'];
+    let flag = false;
+
+    for (let i = 0; i < questionPattern.length; i++) {
+        if (KMP(question, questionPattern[i]).length) {
+            flag = true;
+            break;
+        }
+    }
+
+    return flag && getKodeMatkul(question) && getKeyword(question);
+};
+const getDeadlineFromTask = async (question, userId) => {
+    const data = await Task.find({
+        userId,
+        isFinished: false,
+        kode: getKodeMatkul(question)[0],
+        jenis: getKeyword(question),
+        date: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+    });
+
+    return { res : data, method: 'get'}
+}
+
+
+
 // Add Task
 const isAddTask = question => getKodeMatkul(question) && getDate(question) && getKeyword(question);
+
 const addTask = async (question, userId) => {
     const courseId = getKodeMatkul(question);
     const date = getDate(question);
@@ -58,7 +190,7 @@ const addTask = async (question, userId) => {
         isFinished: false,
     });
 
-    return tasks;
+    return { res : [tasks], method: 'post' };
 };
 
 export const task = async (req, res) => {
@@ -69,20 +201,47 @@ export const task = async (req, res) => {
     await postChatFromUser(req);
     try {
         // Add task
-        if (isAddTask(content)) tasks = await addTask(content, userId);
-        // Get task
-        else if (KMP(content, 'deadline')) {
-            if (isAllTaskQuestion(content)) tasks = await getAllTask(userId);
-            else if (isCurrentTaskQuestion(content)) tasks = await getCurrentTask(userId);
-            else throw new Error('Bad request');
-        } 
-        else if(isFinishTask(content)) tasks = await finishTask(content, userId);
-        else if(isUpdateTask(content)) tasks = await updateTask(content, userId);
-        else {
+        console.log("MASUK TRY");
+        if (isAddTask(content)) {
+            console.log("BAMBANG");
+            tasks = await addTask(content, userId);
+        } else if (KMP(content, 'deadline').length) {
+            console.log("MASUK SINI BANG");
+            if (isTaskBetween(content)){
+                console.log("MASUK 1");
+                tasks = await getTasksBetween(content, userId);
+            }else if(isSpecialTaskAhead(content)){
+                console.log('MASUK 2a');
+                tasks = await getSpecialTaskAhead(content, userId);
+            }
+            else if(isTaskAhead(content)) {
+                console.log("MASUK 2");
+                tasks = await getTaskAhead(content, userId);
+            }
+            else if (isCurrentTaskQuestion(content)){
+                console.log("MASUK 3");
+                tasks = await getCurrentTask(userId); 
+            }else if (isDeadlineFromTask(content)) {
+                tasks = await getDeadlineFromTask(content, userId);
+            }else if (isAllTaskQuestion(content)){
+                console.log("MASUK 4");
+                tasks = await getAllTask(userId);
+            }
+            else {
+                console.log("Masuk 5");
+                throw new Error('Bad request');
+            }
+        } else if (isFinishTask(content)) {
+            console.log("MASUK 6");
+            tasks = await finishTask(content, userId);
+        } else if (isUpdateTask(content)) {
+            console.log("MASUK 7");
+            tasks = await updateTask(content, userId);
+        } else {
             throw new Error('Bad request');
         }
 
-        await postChatFromBot(userId, tasks, 'post');
+        await postChatFromBot(userId, tasks);
 
         res.status(200).json({
             status: 'Success',
@@ -90,6 +249,8 @@ export const task = async (req, res) => {
         });
     } catch (err) {
         await postChatFromBot(userId, false, 'post');
+
+        console.log(err);
 
         res.status(400).json({
             status: 'Failed',
@@ -110,16 +271,13 @@ const isFinishTask = question => {
 
 const finishTask = async (question, userId) => {
     const id = Number(getID(question));
-    console.log(id);
     const filter = { userId : userId, _id : id };
     const finish = { isFinished : true };
 
-    let finished = await Task.findOneAndUpdate(filter, finish);
-    console.log(finished);
-    console.log("SINI");
+    let finished = await Task.findOneAndUpdate(filter, finish, { new: true });
 
-    if(finished.length == 0) return "ID Task tidak ditemukan!";
-    else return "Berhasil menyelesaikan Task dengan ID ${id}!";
+    if(!finished) return { res: [], method: 'post', msg: "ID Task tidak ditemukan!" };
+    else return { res : [finished], method: 'post', msg: `Berhasil menyelesaikan Task dengan ID ${id}!`};
 }
 
 // Update Task
@@ -135,14 +293,13 @@ const isUpdateTask = question => {
 
 const updateTask = async (question, userId) => {
     const id = Number(getID(question));
-    const newDate = getDate(question);
+    let newDate = getDate(question);
+    newDate = normalizeDate(newDate);
     const filter = { userId : userId, _id : id };
     const update = { date : newDate };
 
-    let updated = await Task.findOneAndUpdate(filter, update);
-    console.log(updated);
-    console.log("SINI2");
+    let updated = await Task.findOneAndUpdate(filter, update, { new : true });
 
-    if(updated.length == 0) return "ID Task tidak ditemukan!";
-    else return "Berhasil memperbarui Task dengan ID ${id}!";
+    if(!updated) return { res: [], method: 'post', msg:"ID Task tidak ditemukan!"};
+    else return { res : [updated], method: 'post', msg:`Berhasil memperbarui Task dengan ID ${id}!`};
 }

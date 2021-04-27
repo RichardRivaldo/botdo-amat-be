@@ -1,11 +1,10 @@
 import { Router } from 'express';
-
-import { getAllChat } from '../services/chatService';
+import { protect } from '../services/authService';
+import { getAllChat, getLastBotChat } from '../services/chatService';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
-    getAllChat(req, res);
-});
+router.get('/', protect, getAllChat);
+router.get('/last-bot-chat', protect, getLastBotChat);
 
 export default router;

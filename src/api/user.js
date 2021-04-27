@@ -5,6 +5,6 @@ const router = Router();
 
 router.post('/signup', signup);
 router.post('/login', login);
-router.post('/checkUser', protect, getUser);
+router.post('/check-user', protect, getUser);
 
 export default router;
