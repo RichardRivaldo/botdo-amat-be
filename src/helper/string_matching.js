@@ -22,13 +22,7 @@ export const getDate = str => {
     let pattern2 = `${DD}${separator}${MM}${separator}${YYYY}`; //untuk pattern dd-mm-yyyy
 
     let res = str.match(pattern1) || str.match(pattern2);
-    if (res) {
-        return res;
-        // let { year, month, date } = res.groups;
-        // return new Date(`${date}-${month}-${year}`);
-    }
-
-    return null;
+    return res;
 };
 
 export const get2Date = str => {

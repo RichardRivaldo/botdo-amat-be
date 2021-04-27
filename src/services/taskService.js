@@ -11,7 +11,12 @@ const isAllTaskQuestion = question => {
     }
     return false;
 };
-const getAllTask = async userId => await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
+const getAllTask = async userId =>
+    await Task.find({
+        userId,
+        isFinished: false,
+        date: { $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString() },
+    });
 
 // Get current task
 const isCurrentTaskQuestion = question => {
@@ -29,6 +34,29 @@ const getCurrentTask = async userId =>
             $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString(),
             $lt: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
         },
+    });
+
+// Get deadline task
+const isDeadlineFromTask = question => {
+    const questionPattern = ['kapan', 'tanggal berapa'];
+    let flag = false;
+
+    for (let i = 0; i < questionPattern.length; i++) {
+        if (KMP(question, questionPattern[i]).length) {
+            flag = true;
+            break;
+        }
+    }
+
+    return flag && getKodeMatkul(question) && getKeyword(question);
+};
+const getDeadlineFromTask = async (question, userId) =>
+    await Task.find({
+        userId,
+        isFinished: false,
+        kode: getKodeMatkul(question)[0],
+        jenis: getKeyword(question),
+        date: { $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString() },
     });
 
 // Add Task
@@ -74,6 +102,7 @@ export const task = async (req, res) => {
         else if (KMP(content, 'deadline')) {
             if (isAllTaskQuestion(content)) tasks = await getAllTask(userId);
             else if (isCurrentTaskQuestion(content)) tasks = await getCurrentTask(userId);
+            else if (isDeadlineFromTask(content)) tasks = await getDeadlineFromTask(content, userId);
             else throw new Error('Bad request');
         } else {
             throw new Error('Bad request');
@@ -86,6 +115,7 @@ export const task = async (req, res) => {
             data: tasks,
         });
     } catch (err) {
+        console.log(err);
         await postChatFromBot(userId, false, 'post');
 
         res.status(400).json({
