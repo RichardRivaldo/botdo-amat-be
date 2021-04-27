@@ -1,5 +1,6 @@
 import { Task } from '../models/Task';
 import { getKodeMatkul, getDate, getKeyword } from '../helper/string_matching';
+import { postChatFromUser, postChatFromBot } from './chatService.js';
 import KMP from '../helper/kmp';
 
 // Get All Task
@@ -51,21 +52,31 @@ const addTask = async (question, userId) => {
 export const task = async (req, res) => {
     let tasks;
     const { question } = req.query;
-    const { userId } = req.body;
+    // const { userId } = req.body;
 
+    // const userId = '608688b522900114d02d2adc';
+
+    // req.user = { _id: userId };
+    // req.body.content = question;
+
+    // const chat = await postChatFromUser(req, res);
     try {
-        if (isAllTaskQuestion(question)) tasks = await getAllTask(userId);
-        else if (isAddTask(question)) tasks = await addTask(question, userId);
-        else throw new Error('Bad request');
+            if (isAllTaskQuestion(question)) tasks = await getAllTask(userId);
+            else if (isAddTask(question))
+                tasks = await addTask(question, userId);
+            else throw new Error('Bad request');
 
-        res.status(200).json({
-            status: 'Success',
-            data: tasks,
-        });
-    } catch (err) {
-        res.status(400).json({
-            status: 'Failed',
-            data: err.message,
-        });
+            // const chat = await postChatFromBot(userId, tasks, "post");
+
+            res.status(200).json({
+                status: 'Success',
+                data: tasks,
+            });
+        } catch (err) {
+            // const chat = await postChatFromBot(userId, false, "post");
+            res.status(400).json({
+                status: 'Failed',
+                data: err.message,
+            });
     }
 };
