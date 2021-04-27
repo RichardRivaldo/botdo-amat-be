@@ -19,13 +19,17 @@ const taskSchema = new mongoose.Schema({
         required: true,
         default: Date.now(),
     },
-    name: {
+    kode: {
         type: String,
         required: true,
     },
     jenis: {
         type: String,
         enum: [KUIS, UJIAN, PR, TUCIL, TUBES, PRAKTIKUM],
+        required: true,
+    },
+    topic: {
+        type: String,
         required: true,
     },
     isFinished: {

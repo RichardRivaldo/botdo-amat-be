@@ -9,7 +9,7 @@ export const getAllChat = async (req, res) => {
     }
 };
 
-export const postChatFromUser = async (req, res) => {
+export const postChatFromUser = async req => {
     let user = req.user._id;
     let content = req.body.content;
     let chat = await new Chat({ content, user, isRobot: false });

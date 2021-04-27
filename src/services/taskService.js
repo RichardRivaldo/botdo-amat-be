@@ -19,6 +19,9 @@ const isAddTask = question => {
     const date = getDate(question);
     const type = getKeyword(question);
 
+    console.log('INI DARI ADD TASK');
+    console.log(courseId && date && type);
+
     return courseId && date && type;
 };
 
@@ -40,8 +43,9 @@ const addTask = async (question, userId) => {
 
     const tasks = await Task.create({
         userId,
+        topic,
         date: new Date(`${mm}-${dd}-${yyyy}`),
-        name: courseId[0],
+        kode: courseId[0],
         jenis: type,
         isFinished: false,
     });
@@ -52,32 +56,31 @@ const addTask = async (question, userId) => {
 
 export const task = async (req, res) => {
     let tasks;
-    const { question } = req.query;
-    // const { userId } = req.body;
+    const { content } = req.body;
+    const userId = req.user._id;
 
-    // const userId = '608688b522900114d02d2adc';
-
-    // req.user = { _id: userId };
-    // req.body.content = question;
-
-    // const chat = await postChatFromUser(req, res);
+    await postChatFromUser(req);
     try {
-            if (isAllTaskQuestion(question)) tasks = await getAllTask(userId);
-            else if (isAddTask(question))
-                tasks = await addTask(question, userId);
-            else throw new Error('Bad request');
+        console.log('MASUK SINI BANG');
+        if (isAllTaskQuestion(content)) {
+            console.log('MASUK SINI');
+            tasks = await getAllTask(userId);
+        } else if (isAddTask(content)) {
+            console.log('KOK SINI');
+            tasks = await addTask(content, userId);
+        } else throw new Error('Bad request');
 
-            // const chat = await postChatFromBot(userId, tasks, "post");
+        const chat = await postChatFromBot(userId, tasks, 'post');
 
-            res.status(200).json({
-                status: 'Success',
-                data: tasks,
-            });
-        } catch (err) {
-            // const chat = await postChatFromBot(userId, false, "post");
-            res.status(400).json({
-                status: 'Failed',
-                data: err.message,
-            });
+        res.status(200).json({
+            status: 'Success',
+            data: tasks,
+        });
+    } catch (err) {
+        const chat = await postChatFromBot(userId, false, 'post');
+        res.status(400).json({
+            status: 'Failed',
+            data: err.message,
+        });
     }
 };

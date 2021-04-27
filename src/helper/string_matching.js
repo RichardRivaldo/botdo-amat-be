@@ -37,6 +37,8 @@ export const getDate = str => {
     return null;
 };
 
+export const get2Date = str => {};
+
 export const getKodeMatkul = str => {
     let pattern = /[A-Z][A-Z][0-9][0-9][0-9][0-9]/;
     let res = str.match(pattern);

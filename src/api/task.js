@@ -4,6 +4,6 @@ import { protect } from '../services/authService';
 
 const router = Router();
 
-router.get('/', protect, task);
+router.post('/', protect, task);
 
 export default router;
