@@ -72,7 +72,7 @@ export const getKodeMatkul = str => {
 };
 
 export const getID = str => {
-    let pattern = '[Ii][Dd][ -:][0-9]+';
+    let pattern = '[I|i][D|d][ -:][0-9]+';
     let res = str.match(pattern);
 
     return res ? res[0].replace(/id[ -:]/, '') : null;

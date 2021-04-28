@@ -11,7 +11,7 @@ export const getDeadlineFromTask = async (question, userId) => {
         date: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
     });
 
-    return { res: data, method: 'get' };
+    return { res: data, method: 'get-date' };
 };
 
 export const isDeadlineFromTask = question => {

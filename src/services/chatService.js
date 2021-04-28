@@ -35,16 +35,28 @@ export const postChatFromBot = async (user, obj) => {
                 content = isNull ? '[Anda tidak memiliki deadline!]' : '[Daftar deadline anda:]';
                 break;
             case 'update':
-                content = isNull ? '[Task telah ]' : '[Task berhasil diperbaharui!]';
+                content = isNull
+                    ? '[Task tidak ditemukan sebagai task yang belum selesai]'
+                    : '[Task berhasil diperbaharui!]';
+                break;
+            case 'get-date':
+                content = isNull ? '[Task tidak ditemukan]' : '[Berikut deadline task anda]';
         }
     }
 
     content += msg || '';
-    if (res) {
+
+    if (res && method != 'get-date') {
         res.map(row => {
-            content += `\n(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() + 1}/${row.date.getFullYear()}`;
+            content += `<br/>(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() +
+                1}/${row.date.getFullYear()}`;
             content += ` - ${row.jenis} - ${row.kode} - ${row.topic} - `;
             content += row.isFinished ? 'Sudah selesai<br/>' : 'Belum selesai<br/>';
+        });
+    } else if (res) {
+        res.map(row => {
+            content += `<br/>(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() +
+                1}/${row.date.getFullYear()}<br/>`;
         });
     }
 

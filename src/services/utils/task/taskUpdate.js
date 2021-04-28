@@ -18,9 +18,11 @@ export const updateTask = async (question, userId) => {
 export const isUpdateTask = question => {
     const id = getID(question);
     const newDate = getDate(question);
-    const pattern = ['diundur', 'diubah', 'dimajukan', 'update'];
+    const pattern = ['diundur', 'diubah', 'dimajukan', 'update', 'ubah'];
+
     for (let i = 0; i < pattern.length; i++) {
         if (KMP(question, pattern[i]).length) return true && id != null && newDate != null;
     }
+
     return false;
 };

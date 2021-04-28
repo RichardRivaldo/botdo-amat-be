@@ -21,7 +21,7 @@ export const task = async (req, res) => {
         // Add task
         if (isAddTask(content)) {
             tasks = await addTask(content, userId);
-        } else if (KMP(content, 'deadline').length) {
+        } else if (KMP(content, 'deadline').length || KMP(content, 'task').length) {
             if (isTaskBetween(content)) {
                 tasks = await getTasksBetween(content, userId);
             } else if (isSpecialTaskAhead(content)) {
@@ -34,15 +34,13 @@ export const task = async (req, res) => {
                 tasks = await getDeadlineFromTask(content, userId);
             } else if (isAllTaskQuestion(content)) {
                 tasks = await getAllTask(userId);
+            } else if (isFinishTask(content)) {
+                tasks = await finishTask(content, userId);
+            } else if (isUpdateTask(content)) {
+                tasks = await updateTask(content, userId);
             } else {
                 throw new Error('Bad request');
             }
-        } else if (isFinishTask(content)) {
-            tasks = await finishTask(content, userId);
-        } else if (isUpdateTask(content)) {
-            tasks = await updateTask(content, userId);
-        } else {
-            throw new Error('Bad request');
         }
 
         await postChatFromBot(userId, tasks);

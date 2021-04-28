@@ -15,7 +15,7 @@ export const getCurrentTask = async userId => {
 };
 
 export const isCurrentTaskQuestion = question => {
-    const questionPattern = ['hari ini'];
+    const questionPattern = ['hari ini', 'sekarang'];
     for (let i = 0; i < questionPattern.length; i++) {
         if (KMP(question, questionPattern[i]).length) return true;
     }

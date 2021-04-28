@@ -16,8 +16,10 @@ export const finishTask = async (question, userId) => {
 export const isFinishTask = question => {
     const id = getID(question);
     const pattern = ['selesai', 'sudah', 'finish'];
+
     for (let i = 0; i < pattern.length; i++) {
         if (KMP(question, pattern[i]).length) return true && id != null;
     }
+
     return false;
 };
