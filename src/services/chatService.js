@@ -20,13 +20,12 @@ export const postChatFromUser = async req => {
 };
 
 export const postChatFromBot = async (user, obj) => {
-    console.log(obj);
     const { method, msg, res } = obj;
     let content = '';
+
     if (obj == false) {
-                          content = '[Terjadi kesalahan pada server!]';
-                          // throw new Error('[Pesan tidak dikenali!]');
-                      } else {
+        content = '[Terjadi kesalahan pada server!]';
+    } else {
         let isNull = !Object.keys(obj).length;
         switch (method) {
             case 'post':
@@ -35,30 +34,27 @@ export const postChatFromBot = async (user, obj) => {
             case 'get':
                 content = isNull ? '[Anda tidak memiliki deadline!]' : '[Daftar deadline anda:]';
                 break;
-             case 'update':
+            case 'update':
                 content = isNull ? '[Task telah ]' : '[Task berhasil diperbaharui!]';
         }
     }
 
     content += msg || '';
-    console.log("res",res);
-    if  (res)  {
+    if (res) {
         res.map(row => {
             content += `\n(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() + 1}/${row.date.getFullYear()}`;
             content += ` - ${row.jenis} - ${row.kode} - ${row.topic} - `;
-            content += row.isFinished ? 'Sudah selesai\n' : 'Belum selesai\n';
+            content += row.isFinished ? 'Sudah selesai<br/>' : 'Belum selesai<br/>';
         });
-    }   
-  
-    console.log("INI CONTENT");
-    console.log(content);
+    }
+
     let chat = await new Chat({ content, user, isRobot: true });
     await chat.save();
+
     return chat;
 };
 
 export const getLastBotChat = async (req, res) => {
-    console.log(req.user);
     try {
         const data = await Chat.find({ user: req.user._id })
             .sort({ createdAt: -1 })
@@ -73,4 +69,4 @@ export const getLastBotChat = async (req, res) => {
             data: err.message,
         });
     }
-}
+};

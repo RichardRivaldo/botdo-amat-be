@@ -6,7 +6,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: '../../config.env' });
 
 const mongoose = require('mongoose');
-const db = 'mongodb+srv://stima2:stima@cluster0.hbohv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+const db = process.env.ATLAS_URL;
 (async () => {
     await mongoose.connect(db, {
         // options for deal some deprecations warning when creating our app
