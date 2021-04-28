@@ -15,9 +15,10 @@ const boyermoore = (str, pattern, isCaseSensitive = false) => {
     while (i < str.length) {
         let j = pattern.length - 1;
         while (j >= 0 && str[i + j] == pattern[j]) j--;
+
         if (j == -1) res.push(i);
 
-        i += badMatchTable[i + pattern.length - 1] ? badMatchTable[i + pattern.length - 1] : pattern.length;
+        i += badMatchTable[str[i + pattern.length - 1]] ? badMatchTable[str[i + pattern.length - 1]] : pattern.length;
     }
 
     return res;
