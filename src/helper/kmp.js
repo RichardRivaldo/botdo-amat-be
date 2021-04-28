@@ -33,17 +33,25 @@ const KMP = (str, pattern, isCaseSensitive = false) => {
 const generateHelper = pattern => {
     const n = pattern.length;
     let helper = new Array(n);
+
     let i = 1;
     let j = 0;
     helper[0] = 0;
-    for (i = 1; i < n; i++) {
+
+    while (i < n) {
         if (pattern[i] == pattern[j]) {
-            j++;
+            helper[i] = ++j;
         } else {
-            j = j - 1 >= 0 ? helper[j - 1] : 0;
+            if (j - 1 >= 0) {
+                j = helper[j - 1];
+                continue;
+            } else {
+                helper[i] = 0;
+            }
         }
-        helper[i] = j;
+        i++;
     }
+
     return helper;
 };
 
