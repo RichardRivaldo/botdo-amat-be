@@ -2,7 +2,11 @@ import { Task } from '../../../models/Task';
 import KMP from '../../../helper/kmp';
 
 export const getAllTask = async userId => {
-    const res = await Task.find({ userId, isFinished: false, date: { $gte: Date.now() } });
+    const res = await Task.find({
+        userId,
+        isFinished: false,
+        date: { $gte: new Date().setHours(0, 0, 0, 0) },
+    });
     return { res, method: 'get' };
 };
 
