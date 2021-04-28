@@ -53,13 +53,13 @@ export const postChatFromBot = async (user, obj) => {
             content += ` - ${row.jenis} - ${row.kode} - ${row.topic} - `;
             content += row.isFinished ? 'Sudah selesai<br/>' : 'Belum selesai<br/>';
         });
-    } else if (res) {
+    } else if (res && res.length != 0) {
         res.map(row => {
             content += `<br/>(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() +
                 1}/${row.date.getFullYear()}<br/>`;
         });
-    } else if (obj !== false) {
-        content += 'Mantap gaada deadline bos';
+    } else {
+        content += '<br/>Mantap gaada deadline bos<br/>';
     }
 
     let chat = await new Chat({ content, user, isRobot: true });
