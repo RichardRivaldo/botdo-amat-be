@@ -22,23 +22,34 @@ export const getDate = str => {
     let pattern2 = `${DD}${separator}${MM}${separator}${YYYY}`; //untuk pattern dd-mm-yyyy
 
     let res = str.match(pattern1) || str.match(pattern2);
-    return res;
+    if  (res?.length)  {
+        return res;
+    }
+    return false;
 };
 
 export const get2Date = str => {
-    const date1 = getDate(str)[0];
-    str = str.replace(date1, '');
-    const date2 = getDate(str)[0];
-    return date1 && date2 ? { date1, date2 } : false;
+    const date1 = getDate(str);
+    if(date1){
+        str = str.replace(date1[0], '');
+        const date2 = getDate(str);
+        return date1 && date2 ? { date1: normalizeDate(date1), date2: normalizeDate(date2) } : false;
+    }
+    return false;
 };
 
 export const getNDate = str => {
-    let n = getNumber(str)[0];
+    console.log(str);
+    let n = getNumber(str);
     if (!n) {
         return false;
     }
-    const date1 = new Date();
+    let date1 = new Date();
+    date1 = new Date(date1.setUTCHours(0, 0, 0, 0));    
     let date2 = new Date();
+
+    console.log("INI DATE 1");
+    console.log(date1);
 
     let curDate = date1.getDate();
     if (boyermoore(str, 'hari').length) {
@@ -48,11 +59,20 @@ export const getNDate = str => {
     } else {
         return false;
     }
-
+    
     date2 = new Date(date2);
+    date2 = new Date(date2.setUTCHours(23, 59, 59, 999));
+
+    console.log(date2);
 
     return { date1, date2 };
 };
+
+export const normalizeDate = str => {
+    str = str.groups;
+    str = new Date(`${str.year}-${str.month}-${str.date}`);
+    return str;
+}
 
 export const getKodeMatkul = str => {
     let pattern = /[A-Z][A-Z][0-9][0-9][0-9][0-9]/;
@@ -61,20 +81,21 @@ export const getKodeMatkul = str => {
 };
 
 export const getID = str => {
-    //id 1 digit
-    let pattern = '[Ii][Dd][ -:][0-9]';
+    let pattern = '[Ii][Dd][ -:][0-9]+';
     let res = str.match(pattern);
     if (res) {
-        return res;
+      return res[0].replace(/id[ -:]/, '');
     }
     return null;
 };
 
 export const getNumber = str => {
     let pattern = '[0-9]';
+    console.log("INI DI GETNUMBER");
+    console.log(str);
     let res = str.match(pattern);
-    if (res) {
+    if (res?.length) {
         return res;
     }
-    return null;
+    return false;
 };
