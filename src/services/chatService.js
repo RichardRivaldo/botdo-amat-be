@@ -3,7 +3,7 @@ import { Chat } from '../models/Chat';
 export const getAllChat = async (req, res) => {
     const userId = req.user._id;
     try {
-        let chats = await Chat.find(userId);
+        let chats = await Chat.find({ user: userId });
         res.send(chats);
     } catch (err) {
         res.send({ msg: err });
@@ -24,7 +24,7 @@ export const postChatFromBot = async (user, obj) => {
     let content = '';
 
     if (obj == false) {
-        content = '[Terjadi kesalahan pada server!]';
+        content = 'Maaf! Terjadi kesalahan! Pesan tidak dikenali atau ada masalah pada server!';
     } else {
         let isNull = !Object.keys(obj).length;
         switch (method) {
