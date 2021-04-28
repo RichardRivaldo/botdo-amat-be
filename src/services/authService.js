@@ -21,7 +21,6 @@ export const signup = async (req, res) => {
         res.cookie('jwt', token, cookieOptions);
 
         user.password = undefined;
-        console.log(user);
 
         res.status(200).json({
             status: 'Success',
@@ -57,8 +56,6 @@ export const login = async (req, res) => {
         if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
         res.cookie('jwt', token, cookieOptions);
         user.password = undefined;
-
-        console.log(user);
 
         res.status(200).json({
             status: 'Success',
