@@ -1,6 +1,3 @@
-//contoh pemakaian boyermoore("I love dog and hot dogs","dog")
-//akan mengembalikan [7, 19] yang menyatakan index huruf pertama ditemukannya "dog"
-
 const boyermoore = (str, pattern, isCaseSensitive = false) => {
     if (!isCaseSensitive) {
         str = str.toLowerCase();
@@ -38,4 +35,4 @@ const generateBadMatchTable = pattern => {
     return helper;
 };
 
-export default boyermoore;
+console.log(boyermoore('apa saja saya suka', 'a'));

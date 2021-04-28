@@ -9,22 +9,26 @@ const KMP = (str, pattern, isCaseSensitive = false) => {
 
     const helper = generateHelper(pattern);
     const n = str.length;
+    const res = [];
 
+    let i = 0;
     let j = 0;
-    let res = [];
-    for (let i = 0; i < n; i++) {
+    while (i < n) {
         if (str[i] == pattern[j]) {
             j++;
-            if (j >= pattern.length) {
-                res.push(i - (pattern.length - 1));
-                j = 0;
-            }
         } else {
-            j = helper[j];
-            if (str[i] !== pattern[j]) {
-                j = 0;
+            if (j != 0) {
+                j = helper[j - 1];
+                continue;
             }
         }
+
+        if (j == pattern.length) {
+            res.push(i - j + 1);
+            j = helper[j - 1];
+        }
+
+        i++;
     }
 
     return res;
@@ -32,7 +36,7 @@ const KMP = (str, pattern, isCaseSensitive = false) => {
 
 const generateHelper = pattern => {
     const n = pattern.length;
-    let helper = new Array(n);
+    const helper = new Array(n);
 
     let i = 1;
     let j = 0;
