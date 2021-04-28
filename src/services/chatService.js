@@ -46,7 +46,7 @@ export const postChatFromBot = async (user, obj) => {
 
     content += msg || '';
 
-    if (res && method != 'get-date') {
+    if (res && method !== 'get-date') {
         res.map(row => {
             content += `<br/>(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() +
                 1}/${row.date.getFullYear()}`;
@@ -58,6 +58,8 @@ export const postChatFromBot = async (user, obj) => {
             content += `<br/>(ID: ${row._id}) ${row.date.getDate()}/${row.date.getMonth() +
                 1}/${row.date.getFullYear()}<br/>`;
         });
+    } else if (obj !== false) {
+        content += 'Mantap gaada deadline bos';
     }
 
     let chat = await new Chat({ content, user, isRobot: true });
